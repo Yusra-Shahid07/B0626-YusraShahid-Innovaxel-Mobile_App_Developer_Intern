@@ -1,19 +1,19 @@
-import React, { useContext } from 'react';
-import { TouchableOpacity, Text, View, Platform } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ThemeContext } from '../constants/theme';
+import React, { useContext } from "react";
+import { TouchableOpacity, Text, View } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { ThemeContext } from "../constants/theme";
 
-import HomeScreen from '../screens/HomeScreen';
-import AddExpenseScreen from '../screens/AddExpenseScreen';
-import SummaryScreen from '../screens/SummaryScreen';
+import HomeScreen from "../screens/HomeScreen";
+import AddExpenseScreen from "../screens/AddExpenseScreen";
+import SummaryScreen from "../screens/SummaryScreen";
 
 const Tab = createBottomTabNavigator();
 
 const TAB_ICONS = {
-  Home:         { active: '⬛', inactive: '⬜', label: 'Home' },
-  'Add Expense':{ active: '+',  inactive: '+',  label: 'Add' },
-  Summary:      { active: '▦',  inactive: '▤',  label: 'Summary' },
+  Home: { active: "⌂", inactive: "⌂" },
+  "Add Expense": { active: "+", inactive: "+" },
+  Summary: { active: "≡", inactive: "≡" },
 };
 
 export default function AppNavigator() {
@@ -24,121 +24,89 @@ export default function AppNavigator() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerStyle: {
-            backgroundColor: theme.card,
-            shadowColor: 'transparent',
-            elevation: 0,
+            backgroundColor: isDark ? theme.card : theme.primary,
             borderBottomWidth: 1,
-            borderBottomColor: theme.border,
+            borderBottomColor: isDark ? theme.border : "rgba(255,255,255,0.2)",
+            elevation: 0,
+            shadowOpacity: 0,
           },
+          headerTintColor: isDark ? theme.text : "#FFFFFF",
           headerTitleStyle: {
+            fontWeight: "700",
             fontSize: 17,
-            fontWeight: '700',
-            color: theme.text,
-            letterSpacing: -0.3,
+            fontFamily: "Inter_700Bold",
+            color: isDark ? theme.text : "#FFFFFF",
           },
-          headerTintColor: theme.text,
           headerRight: () => (
             <TouchableOpacity
               onPress={toggleTheme}
               style={{
                 marginRight: 16,
-                width: 34,
-                height: 34,
-                borderRadius: 10,
+                width: 36,
+                height: 36,
+                borderRadius: 18,
                 backgroundColor: theme.primaryGlow,
-                borderWidth: 1,
-                borderColor: theme.primary + '40',
-                justifyContent: 'center',
-                alignItems: 'center',
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <Text style={{ fontSize: 16 }}>{isDark ? '☀' : '◑'}</Text>
+              <Text style={{ fontSize: 18 }}>{isDark ? "☀️" : "🌙"}</Text>
             </TouchableOpacity>
           ),
           tabBarStyle: {
-            backgroundColor: theme.tabBar,
-            borderTopWidth: 1,
+            backgroundColor: isDark ? theme.tabBar : "#FFFFFF",
             borderTopColor: theme.border,
-            paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-            paddingTop: 8,
-            height: Platform.OS === 'ios' ? 80 : 62,
+            borderTopWidth: 1,
+            paddingBottom: 10,
+            paddingTop: 10,
+            height: 76,
+            elevation: 0,
           },
           tabBarActiveTintColor: theme.primary,
-          tabBarInactiveTintColor: theme.textMuted,
+          tabBarInactiveTintColor: isDark ? theme.textMuted : "#9090A8",
           tabBarLabelStyle: {
-            fontSize: 11,
-            fontWeight: '600',
-            letterSpacing: 0.3,
+            fontSize: 13,
+            fontWeight: "630",
             marginTop: 2,
           },
-          tabBarIcon: ({ focused, color }) => {
-            if (route.name === 'Add Expense') {
-              return (
-                <View style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 11,
-                  backgroundColor: focused ? theme.primary : theme.primaryGlow,
-                  borderWidth: 1.5,
-                  borderColor: theme.primary,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                  <Text style={{
-                    fontSize: 20,
-                    fontWeight: '300',
-                    color: focused ? '#fff' : theme.primary,
-                    lineHeight: 24,
-                  }}>+</Text>
-                </View>
-              );
-            }
-            if (route.name === 'Home') {
-              return (
-                <View style={{
-                  width: 22, height: 22,
-                  justifyContent: 'center', alignItems: 'center',
-                }}>
-                  <View style={{
-                    width: 20, height: 20, borderRadius: 5,
-                    borderWidth: focused ? 0 : 1.5,
-                    borderColor: color,
-                    backgroundColor: focused ? color : 'transparent',
-                  }} />
-                </View>
-              );
-            }
-            if (route.name === 'Summary') {
-              return (
-                <View style={{ width: 22, height: 22, justifyContent: 'center', alignItems: 'center', gap: 3 }}>
-                  {[80, 55, 95].map((w, i) => (
-                    <View key={i} style={{
-                      width: (w / 100) * 18,
-                      height: 3,
-                      borderRadius: 2,
-                      backgroundColor: focused ? color : theme.textMuted,
-                    }} />
-                  ))}
-                </View>
-              );
-            }
-          },
+          tabBarIcon: ({ focused }) => (
+            <Text
+              style={{
+                fontSize: focused ? 28 : 26,
+                color: focused ? theme.primary : theme.textMuted,
+                fontWeight: "700",
+              }}
+            >
+              {focused
+                ? TAB_ICONS[route.name]?.active
+                : TAB_ICONS[route.name]?.inactive}
+            </Text>
+          ),
         })}
       >
         <Tab.Screen
           name="Home"
           component={HomeScreen}
-          options={{ tabBarLabel: 'Home', title: 'Expenses' }}
+          options={{ title: "Expenses", tabBarLabel: "Home" }}
         />
         <Tab.Screen
           name="Add Expense"
           component={AddExpenseScreen}
-          options={{ tabBarLabel: 'Add', title: 'New Expense' }}
+          options={({ route }) => ({
+            title: route.params?.expense ? "Edit Expense" : "New Expense",
+            tabBarLabel: "Add",
+          })}
+          listeners={({ navigation }) => ({
+            tabPress: (e) => {
+              e.preventDefault();
+              navigation.navigate("Add Expense", { expense: null });
+            },
+          })}
         />
         <Tab.Screen
           name="Summary"
           component={SummaryScreen}
-          options={{ tabBarLabel: 'Summary', title: 'Summary' }}
+          options={{ title: "Summary", tabBarLabel: "Summary" }}
         />
       </Tab.Navigator>
     </NavigationContainer>
